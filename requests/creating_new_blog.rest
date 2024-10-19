@@ -1,0 +1,12 @@
+GET http://localhost:3003/api/blogs/
+
+###
+POST http://localhost:3003/api/blogs/ HTTP/1.1
+content-type: application/json
+
+{
+  "title": "Creating APIs with node is Easy if you know how!",
+  "author": "Dani Ortiz",
+  "url": "/creating-api",
+  "likes": "5"
+}
