@@ -19,3 +19,14 @@ content-type: application/json
   "author": "Dani Ortiz",
   "url": "/using-rest"
 }
+###
+DELETE  http://localhost:3003/api/blogs/67224842f1848d41765fae3b HTTP/1.1
+content-type: application/json
+
+###
+PUT http://localhost:3003/api/blogs/67224842f1848d41765fae3b HTTP/1.1
+content-type: application/json
+
+{
+  "likes": 50
+}

@@ -2,32 +2,19 @@ const { test, after, beforeEach, describe } = require('node:test')
 const assert = require('node:assert')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
+const helper = require('./test_helper')
 const app = require('../app')
 const Blog = require('../models/blog')
 const { title } = require('node:process')
+const { log } = require('node:console')
 
 const api = supertest(app)
 
-const initialBlogs = [
-  {
-    title: 'Creating APIs with node is Easy if you know how!',
-    author: 'Dani Ortiz',
-    url: '/creating-api',
-    likes: 5,
-  },
-  {
-    title: 'Testing for Dummies!',
-    author: 'Dani Ortiz',
-    url: '/testing-backend',
-    likes: 5,
-  },
-]
-
 beforeEach(async () => {
   await Blog.deleteMany({})
-  let blogObject = new Blog(initialBlogs[0])
+  let blogObject = new Blog(helper.initialBlogs[0])
   await blogObject.save()
-  blogObject = new Blog(initialBlogs[1])
+  blogObject = new Blog(helper.initialBlogs[1])
   await blogObject.save()
 })
 
@@ -40,7 +27,7 @@ test('blogs are returned as json and contains the right quantity of blogs', asyn
 
   const response = await api.get('/api/blogs')
 
-  assert.strictEqual(response.body.length, initialBlogs.length)
+  assert.strictEqual(response.body.length, helper.initialBlogs.length)
 })
 
 /* Excercise 4.9 */
@@ -77,7 +64,7 @@ test('a valid blog can be added', async () => {
 
   const titles = response.body.map((r) => r.title)
 
-  assert.strictEqual(response.body.length, initialBlogs.length + 1)
+  assert.strictEqual(response.body.length, helper.initialBlogs.length + 1)
 
   assert(titles.includes('Adding blogs for testing'))
 })
@@ -96,9 +83,9 @@ test('Likes default to 0', async () => {
     .expect(201)
     .expect('Content-Type', /application\/json/)
 
-    console.log('response:',response.res.text)
-    
-    //assert.strictEqual(response.body.likes, 0)
+  const responseObject = JSON.parse(response.res.text)
+
+  assert.strictEqual(responseObject.likes, 0)
 })
 
 /* Excercise 4.12 */
@@ -128,6 +115,28 @@ describe('adding a new blog without requiered fields', () => {
       .expect(400)
       .expect('Content-Type', /application\/json/)
   })
+})
+
+/* Excercise 4.13 */
+test('Delete erases entry', async () => {
+  const blogsAtStart = await helper.notesInDb()
+  const blogToDelete = blogsAtStart[0]
+
+  await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
+
+  const response = await api.get('/api/blogs')
+  assert.strictEqual(response.body.length, blogsAtStart.length - 1)
+})
+
+/* Excercise 4.14 */
+test.only('Update likes of entry', async () => {
+  const blogsAtStart = await helper.notesInDb()
+  const blogToUpdate = blogsAtStart[0]
+  const body = { likes: 50 }
+  await api.put(`/api/blogs/${blogToUpdate.id}`).send(body).expect(200)
+
+  const response = await api.get(`/api/blogs/${blogToUpdate.id}`) 
+  assert.strictEqual(response._body.likes, body.likes)
 })
 
 after(async () => {
