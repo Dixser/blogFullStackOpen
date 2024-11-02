@@ -129,7 +129,7 @@ test('Delete erases entry', async () => {
 })
 
 /* Excercise 4.14 */
-test.only('Update likes of entry', async () => {
+test('Update likes of entry', async () => {
   const blogsAtStart = await helper.notesInDb()
   const blogToUpdate = blogsAtStart[0]
   const body = { likes: 50 }
