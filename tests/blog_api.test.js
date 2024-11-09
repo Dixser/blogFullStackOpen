@@ -46,7 +46,7 @@ test('blogs contain id propierty and not _id', async () => {
 })
 
 /* Excercise 4.10 */
-test.only('a valid blog can be added', async () => {
+test('a valid blog can be added', async () => {
   const newBlog = {
     title: 'Adding blogs for testing',
     author: 'Dani Ortiz',
