@@ -3,6 +3,7 @@ require('express-async-errors')
 const app = express()
 const cors = require('cors')
 const { mongoUrl } = require('./utils/config')
+const middleware = require('./utils/middleware')
 const blogRouter = require('./controllers/blogs')
 const userRouter = require('./controllers/users')
 const loginRouter = require('./controllers/login')
@@ -15,17 +16,9 @@ mongoose.connect(mongoUrl)
 app.use(cors())
 app.use(express.json())
 
-const tokenExtractor = (request,response, next) => {
-  const authorization = request.get('authorization')
-  if(authorization && authorization.startsWith('Bearer ')){
-    request.token = authorization.replace('Bearer ', '')
-  }
-  next()
-}
+app.use(middleware.tokenExtractor)
 
-app.use(tokenExtractor)
-
-app.use('/api/blogs', blogRouter)
+app.use('/api/blogs', middleware.userExtractor, blogRouter)
 app.use('/api/users', userRouter)
 app.use('/api/login', loginRouter)
 const errorHandler = (error, request, response, next) => {
