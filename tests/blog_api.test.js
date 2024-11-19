@@ -5,8 +5,6 @@ const supertest = require('supertest')
 const helper = require('./test_helper')
 const app = require('../app')
 const Blog = require('../models/blog')
-const { title } = require('node:process')
-const { log } = require('node:console')
 
 const api = supertest(app)
 
@@ -47,19 +45,29 @@ test('blogs contain id propierty and not _id', async () => {
 
 /* Excercise 4.10 */
 test('a valid blog can be added', async () => {
+  const user = helper.user
+
+  const result = await api
+    .post('/api/login')
+    .send(user)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+
   const newBlog = {
     title: 'Adding blogs for testing',
-    author: 'Dani Ortiz',
+    author: 'Superuser',
     url: '/adding-new-entries',
     likes: 9,
   }
 
-  await api
+ await api
     .post('/api/blogs')
     .send(newBlog)
+    .set('Authorization', `Bearer ${result.body.token}`)
     .expect(201)
     .expect('Content-Type', /application\/json/)
 
+  
   const response = await api.get('/api/blogs')
 
   const titles = response.body.map((r) => r.title)
@@ -135,7 +143,7 @@ test('Update likes of entry', async () => {
   const body = { likes: 50 }
   await api.put(`/api/blogs/${blogToUpdate.id}`).send(body).expect(200)
 
-  const response = await api.get(`/api/blogs/${blogToUpdate.id}`) 
+  const response = await api.get(`/api/blogs/${blogToUpdate.id}`)
   assert.strictEqual(response._body.likes, body.likes)
 })
 
